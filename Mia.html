@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>💕 Happy Valentine's Day</title>
+  <link rel="stylesheet" href="site.css" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Crimson+Pro:ital,wght@0,300;1,300&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <div class="petals-bg" id="petals-bg"></div>
+  <div class="stars" id="stars"></div>
+
+  <main class="container">
+    <header class="header">
+      <p class="subtitle">a little something for you</p>
+      <h1 class="title">Pour your love in</h1>
+    </header>
+
+    <section class="heart-wrapper">
+      <div class="percent-label" id="percent-label">0%</div>
+
+      <div class="heart-container" id="heart-container" role="button" aria-label="Click to fill the heart" tabindex="0">
+        <svg class="heart-svg" viewBox="0 0 200 180" xmlns="http://www.w3.org/2000/svg">
+          <defs>
+            <clipPath id="heart-clip">
+              <path d="M100,160 C100,160 10,100 10,50 C10,25 30,5 55,5 C70,5 85,15 100,30 C115,15 130,5 145,5 C170,5 190,25 190,50 C190,100 100,160 100,160 Z"/>
+            </clipPath>
+            <linearGradient id="fill-gradient" x1="0" y1="1" x2="0" y2="0">
+              <stop offset="0%" stop-color="#ff2d55"/>
+              <stop offset="50%" stop-color="#ff6b8a"/>
+              <stop offset="100%" stop-color="#ffb3c6"/>
+            </linearGradient>
+            <linearGradient id="shimmer" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="rgba(255,255,255,0.35)"/>
+              <stop offset="60%" stop-color="rgba(255,255,255,0)"/>
+            </linearGradient>
+          </defs>
+
+          <path class="heart-glow"
+            d="M100,160 C100,160 10,100 10,50 C10,25 30,5 55,5 C70,5 85,15 100,30 C115,15 130,5 145,5 C170,5 190,25 190,50 C190,100 100,160 100,160 Z"/>
+
+          <g clip-path="url(#heart-clip)">
+            <rect id="fill-rect" x="0" y="180" width="200" height="180" fill="url(#fill-gradient)"/>
+          </g>
+
+          <g clip-path="url(#heart-clip)">
+            <rect x="0" y="0" width="200" height="180" fill="url(#shimmer)" pointer-events="none"/>
+          </g>
+
+          <path class="heart-outline"
+            d="M100,160 C100,160 10,100 10,50 C10,25 30,5 55,5 C70,5 85,15 100,30 C115,15 130,5 145,5 C170,5 190,25 190,50 C190,100 100,160 100,160 Z"/>
+        </svg>
+
+        <div class="ripple-container" id="ripple-container"></div>
+        <div class="sparkles" id="sparkles"></div>
+      </div>
+
+      <p class="instruction" id="instruction">click the heart to fill it ✦</p>
+    </section>
+  </main>
+
+  <!-- Valentine's popup -->
+  <div class="popup-overlay" id="popup-overlay">
+    <div class="popup" id="popup">
+      <div class="popup-hearts">
+        <span>💗</span><span>💕</span><span>💗</span>
+      </div>
+      <p class="popup-small">with all my heart</p>
+      <h2 class="popup-message">Happy Valentine's Day<br/><em>EM BE</em></h2>
+      <div class="popup-divider"></div>
+      <p class="popup-note">every click was a little love letter 🌹</p>
+      <button class="popup-btn" id="popup-btn">send it back 💌</button>
+    </div>
+  </div>
+
+  <script>
+    const TOTAL_CLICKS = 10;
+    let clicks = 0;
+    let done = false;
+
+    const heartContainer = document.getElementById('heart-container');
+    const fillRect        = document.getElementById('fill-rect');
+    const percentLabel    = document.getElementById('percent-label');
+    const instruction     = document.getElementById('instruction');
+    const rippleContainer = document.getElementById('ripple-container');
+    const sparklesEl      = document.getElementById('sparkles');
+    const popupOverlay    = document.getElementById('popup-overlay');
+    const popupBtn        = document.getElementById('popup-btn');
+
+    // Floating petals
+    const petalsBg = document.getElementById('petals-bg');
+    for (let i = 0; i < 18; i++) {
+      const p = document.createElement('div');
+      p.classList.add('petal');
+      p.style.left = Math.random() * 100 + 'vw';
+      p.style.animationDuration = (8 + Math.random() * 12) + 's';
+      p.style.animationDelay = -(Math.random() * 20) + 's';
+      p.style.opacity = 0.12 + Math.random() * 0.25;
+      p.style.fontSize = (10 + Math.random() * 18) + 'px';
+      p.textContent = ['🌸','✿','❀','🌺','✦','♡'][Math.floor(Math.random()*6)];
+      petalsBg.appendChild(p);
+    }
+
+    // Stars
+    const starsEl = document.getElementById('stars');
+    for (let i = 0; i < 60; i++) {
+      const s = document.createElement('div');
+      s.classList.add('star');
+      s.style.left = Math.random() * 100 + 'vw';
+      s.style.top  = Math.random() * 100 + 'vh';
+      s.style.animationDelay = -(Math.random() * 4) + 's';
+      s.style.animationDuration = (2 + Math.random() * 3) + 's';
+      s.style.width = s.style.height = (1 + Math.random() * 2.5) + 'px';
+      starsEl.appendChild(s);
+    }
+
+    function setFill(pct) {
+      const newY = 180 - (180 * pct / 100);
+      fillRect.setAttribute('y', newY);
+      percentLabel.textContent = Math.round(pct) + '%';
+      if (pct >= 100) percentLabel.classList.add('full');
+      else if (pct >= 60) percentLabel.classList.add('high');
+    }
+
+    function spawnRipple(x, y) {
+      const r = document.createElement('div');
+      r.classList.add('ripple');
+      const rect = heartContainer.getBoundingClientRect();
+      r.style.left = (x - rect.left) + 'px';
+      r.style.top  = (y - rect.top)  + 'px';
+      rippleContainer.appendChild(r);
+      r.addEventListener('animationend', () => r.remove());
+    }
+
+    function spawnMiniHearts(x, y) {
+      const count = 4 + Math.floor(Math.random() * 4);
+      for (let i = 0; i < count; i++) {
+        const h = document.createElement('div');
+        h.classList.add('mini-heart');
+        const rect = heartContainer.getBoundingClientRect();
+        h.style.left = (x - rect.left) + 'px';
+        h.style.top  = (y - rect.top)  + 'px';
+        const angle = Math.random() * 360;
+        const dist  = 30 + Math.random() * 60;
+        h.style.setProperty('--tx', Math.cos(angle * Math.PI/180) * dist + 'px');
+        h.style.setProperty('--ty', Math.sin(angle * Math.PI/180) * dist + 'px');
+        h.textContent = ['♡','♥','💕','💗'][Math.floor(Math.random()*4)];
+        heartContainer.appendChild(h);
+        h.addEventListener('animationend', () => h.remove());
+      }
+    }
+
+    function launchSparkles() {
+      for (let i = 0; i < 24; i++) {
+        const s = document.createElement('div');
+        s.classList.add('sparkle-burst');
+        const angle = (i / 24) * 360;
+        const dist  = 60 + Math.random() * 90;
+        s.style.setProperty('--tx', Math.cos(angle * Math.PI/180) * dist + 'px');
+        s.style.setProperty('--ty', Math.sin(angle * Math.PI/180) * dist + 'px');
+        s.style.animationDelay = (Math.random() * 0.3) + 's';
+        sparklesEl.appendChild(s);
+        s.addEventListener('animationend', () => s.remove());
+      }
+    }
+
+    function handleClick(e) {
+      if (done) return;
+      clicks++;
+      const pct = Math.min((clicks / TOTAL_CLICKS) * 100, 100);
+      const cx = e.clientX || heartContainer.getBoundingClientRect().left + 100;
+      const cy = e.clientY || heartContainer.getBoundingClientRect().top  + 90;
+
+      spawnRipple(cx, cy);
+      spawnMiniHearts(cx, cy);
+      setFill(pct);
+
+      heartContainer.classList.remove('bounce');
+      void heartContainer.offsetWidth;
+      heartContainer.classList.add('bounce');
+
+      if      (pct < 50)  instruction.textContent = 'keep going... 💫';
+      else if (pct < 80)  instruction.textContent = 'almost there... 🌸';
+      else if (pct < 100) instruction.textContent = 'so close! 💖';
+
+      if (clicks >= TOTAL_CLICKS) {
+        done = true;
+        instruction.textContent = '💗 full of love 💗';
+        heartContainer.classList.add('complete');
+        launchSparkles();
+        setTimeout(() => {
+          popupOverlay.classList.add('show');
+          document.getElementById('popup').classList.add('show');
+        }, 1200);
+      }
+    }
+
+    heartContainer.addEventListener('click', handleClick);
+    heartContainer.addEventListener('touchstart', (e) => { e.preventDefault(); handleClick(e); }, { passive: false });
+    heartContainer.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') handleClick(e); });
+
+    popupBtn.addEventListener('click', () => {
+      popupOverlay.classList.remove('show');
+      setTimeout(() => {
+        clicks = 0; done = false;
+        setFill(0);
+        heartContainer.classList.remove('complete','bounce');
+        percentLabel.classList.remove('full','high');
+        instruction.textContent = 'click the heart to fill it ✦';
+        document.getElementById('popup').classList.remove('show');
+      }, 400);
+    });
+  </script>
+</body>
+</html>
